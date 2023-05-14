@@ -64,3 +64,7 @@ async def get_images(session, page_uri):   #Función que obtiene las imágenes d
         await download(session, image_uri) 
 
 
+async def main(): #Función principal
+    web_page_uri = 'http://www.formation-python.com/'  
+    async with aiohttp.ClientSession() as session:  
+        await get_images(session, web_page_uri) 
