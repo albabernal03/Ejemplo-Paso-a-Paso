@@ -2,6 +2,7 @@
 import asyncio #asyncio es la libreria principal de la programaión asíncrona y se utiliza para crear tareas asíncronas
 import aiohttp #aiohttp es una librería que permite realizar peticiones HTTP de forma asíncrona
 from bs4 import BeautifulSoup #BeautifulSoup es una librería que permite extraer datos de archivos HTML y XML
+from urllib.parse import urlparse #urllib.parse es una librería que permite analizar y construir URLs
 
 async def wget(session, url): #async def define una función asíncrona
     async with session.get(url) as response: #async with permite ejecutar una función asíncrona dentro de otra
@@ -27,3 +28,23 @@ async def get_images_src_from_html(html_doc): #Función que obtiene las imágene
     for img in soup.find_all('img'):  #Recorremos todas las etiquetas img del documento HTML
         yield img.get('src')  #Obtenemos el atributo src de la etiqueta img
         await asyncio.sleep(0.001) #Esperamos 0.001 segundos
+
+
+async def get_uri_from_images_src(base_uri, images_src): #Función que obtiene la URI de las imágenes
+    """Devuelve una a una cada URI de imagen a descargar"""  
+    parsed_base = urlparse(base_uri)  #Analizamos la URI base
+    async for src in images_src:  #Recorremos todas las URI de las imágenes
+        parsed = urlparse(src)  
+        if parsed.netloc == '':  #Si la URI no tiene netloc, es decir, no tiene dominio, se construye la URI completa
+            path = parsed.path  #Obtenemos el path de la URI
+            if parsed.query: #Si la URI tiene query, es decir, tiene parámetros, se añaden a la URI  
+                path += '?' + parsed.query  
+            if path[0] != '/':  #Si el primer carácter del path no es /, se añade
+                if parsed_base.path == '/':
+                    path = '/' + path  
+                else:  
+                    path = '/' + '/'.join(parsed_base.path.split('/')[:-1]) + '/' + path  #Si el path de la URI base no es /, se añade el path de la URI base a la URI 
+            yield parsed_base.scheme + '://' + parsed_base.netloc + path  
+        else:  
+            yield parsed.geturl()  
+        await asyncio.sleep(0.001) 
