@@ -4,6 +4,7 @@ import aiohttp #aiohttp es una librería que permite realizar peticiones HTTP de
 from bs4 import BeautifulSoup #BeautifulSoup es una librería que permite extraer datos de archivos HTML y XML
 from urllib.parse import urlparse #urllib.parse es una librería que permite analizar y construir URLs
 import sys #sys es una librería que permite acceder a variables y funciones mantenidas por el intérprete
+from functools import partial #functools es una librería que permite trabajar con funciones y objetos invocables
 
 async def wget(session, url): #async def define una función asíncrona
     async with session.get(url) as response: #async with permite ejecutar una función asíncrona dentro de otra
@@ -68,3 +69,22 @@ async def main(): #Función principal
     web_page_uri = 'http://www.formation-python.com/'  
     async with aiohttp.ClientSession() as session:  
         await get_images(session, web_page_uri) 
+
+def write_in_file(filename, content):   #Función que escribe en un archivo
+    with open(filename, "wb") as f:   
+        f.write(content) 
+
+async def download(session, uri):  
+    content = await wget(session, uri)  
+    if content is None:  
+        return None  
+    loop = asyncio.get_running_loop()  
+    sep = "/" if "/" in uri else "\\"
+    await loop.run_in_executor(None, partial(write_in_file, 
+uri.split(sep)[-1], content))  
+    return uri 
+
+if __name__ == '__main__':  
+    asyncio.run(main())
+
+    
