@@ -80,14 +80,10 @@ async def download(session, uri):
         return None  
     loop = asyncio.get_running_loop()  
     sep = "/" if "/" in uri else "\\"
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, partial(write_in_file, uri.split(sep)[-1], content))
-    return uri
-
-event_loop = asyncio.new_event_loop() # Creamos un nuevo bucle de eventos
-asyncio.set_event_loop(event_loop) # Establecemos el nuevo bucle de eventos como el bucle de eventos por defecto
+    await loop.run_in_executor(None, partial(write_in_file, uri.split(sep)[-1], content))  
+    return uri 
 
 if __name__ == '__main__':  
-    event_loop.run_until_complete(main()) # Ejecutamos la función main
-    event_loop.close() # Cerramos el bucle de eventos
+    asyncio.run(main())
 
+    
