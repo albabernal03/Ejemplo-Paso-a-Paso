@@ -3,6 +3,7 @@ import asyncio #asyncio es la libreria principal de la programaión asíncrona y
 import aiohttp #aiohttp es una librería que permite realizar peticiones HTTP de forma asíncrona
 from bs4 import BeautifulSoup #BeautifulSoup es una librería que permite extraer datos de archivos HTML y XML
 from urllib.parse import urlparse #urllib.parse es una librería que permite analizar y construir URLs
+import sys #sys es una librería que permite acceder a variables y funciones mantenidas por el intérprete
 
 async def wget(session, url): #async def define una función asíncrona
     async with session.get(url) as response: #async with permite ejecutar una función asíncrona dentro de otra
@@ -48,3 +49,18 @@ async def get_uri_from_images_src(base_uri, images_src): #Función que obtiene l
         else:  
             yield parsed.geturl()  
         await asyncio.sleep(0.001) 
+
+
+
+async def get_images(session, page_uri):   #Función que obtiene las imágenes de una página
+    html = await wget(session, page_uri)  
+    if not html:  
+        print("Error: no se ha encontrado ninguna imagen", sys.stderr)  
+        return None  
+    images_src_gen = get_images_src_from_html(html)  
+    images_uri_gen = get_uri_from_images_src(page_uri, images_src_gen)  
+    async for image_uri in images_uri_gen:  
+        print('Descarga de %s' % image_uri)  
+        await download(session, image_uri) 
+
+
