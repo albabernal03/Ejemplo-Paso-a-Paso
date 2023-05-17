@@ -9,6 +9,7 @@ import aiohttp
 import urllib.request
 
 from urllib3 import HTTPConnectionPool
+from urllib.error import URLError
 
 from generador import download
 
@@ -40,19 +41,16 @@ def get_uri_from_images_src(base_uri, images_src):
             yield parsed.geturl()
 
 def wget(uri):
-    parsed = urlparse(uri)
-    with closing(HTTPConnectionPool(parsed.netloc)) as conn:
-        path=parsed.path
-        if parsed.query:
-            path += '?' + parsed.query
-        conn.request('GET', path)
-        response=conn.getresponse()
+    try:
+        response = urllib.request.urlopen(uri)
         if response.status == 200:
             print(response.reason, file=sys.stderr)
-            return 
+            return
         print('Respuesta OK')
         return response.read()
-    
+    except URLError as e:
+        print("Error al abrir la URL:", e)
+
 def get_image(page_uri):
     html= wget(page_uri)
     if not html:
@@ -60,11 +58,11 @@ def get_image(page_uri):
        return None
     images_scr_gen= get_images_src_from_html(html)
     images_uri_gen= get_uri_from_images_src(page_uri, images_scr_gen)
-    for uri in images_uri_gen:
+    for image_uri in images_uri_gen:
         print('Descarga de %s' % image_uri)
         download(image_uri)
 
 if __name__ == '__main__':
     print('--- Descarga de imágenes ---')
-    web_page_uri= 'http//www.formationpython.com/'
-    print(timeit('get_images(web_page_uri)', number=10, setup='from __main__ import get_images, web_page_uri'))
+    web_page_uri = 'https://www.formationpython.com/'
+    print(timeit.timeit('get_image(web_page_uri)', number=10, setup='from __main__ import get_image, web_page_uri'))
