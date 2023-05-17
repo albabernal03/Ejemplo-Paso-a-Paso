@@ -68,17 +68,19 @@ def get_images(session, page_uri):
         print('Descarga de %s' % image_uri)    
         download(session, image_uri)
 
-def main():
+async def main():
     """Función principal"""  
     if len(sys.argv) < 2:    
         print("Error: falta la URI de la página", sys.stderr)    
         return 1    
-    page_uri = sys.argv[1]    
-    with aiohttp.ClientSession() as session:    
+    page_uri = sys.argv[1]   
+     
+    async with aiohttp.ClientSession() as session:    
         get_images(session, page_uri)    
     return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(asyncio.run(main()))
+
     
 

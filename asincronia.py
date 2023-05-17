@@ -81,9 +81,7 @@ async def download(session, uri):
     loop = asyncio.get_running_loop()  
     sep = "/" if "/" in uri else "\\"
     await loop.run_in_executor(None, partial(write_in_file, uri.split(sep)[-1], content))  
+    await main()
     return uri 
-
-if __name__ == '__main__':  
-    asyncio.run(main())
 
     
