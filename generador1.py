@@ -11,6 +11,8 @@ import urllib.request
 from urllib3 import HTTPConnectionPool
 from urllib.error import URLError
 
+from asincronia import download
+
 
 
 #CON GENERADORES
